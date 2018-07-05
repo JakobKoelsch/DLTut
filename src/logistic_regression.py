@@ -37,7 +37,7 @@ from __future__ import print_function
 
 __docformat__ = 'restructedtext en'
 
-import six.moves.cPickle as pickle
+import cPickle as pickle
 import gzip
 import os
 import sys
@@ -275,7 +275,7 @@ def sgd_optimization_mnist(learning_rate=0.13, n_epochs=1000,
 
     """
     datasets = load_data(dataset)
-
+    
     train_set_x, train_set_y = datasets[0]
     valid_set_x, valid_set_y = datasets[1]
     test_set_x, test_set_y = datasets[2]
