@@ -396,8 +396,8 @@ def test_mlp(learning_rate=0.01, L1_reg=0.00, L2_reg=0.0001, n_epochs=1000,
                            test_score * 100.))
 
                     # save the best model
-                    # with open('best_mlp_model.pkl', 'wb') as f:
-                    #     pickle.dump(classifier, f)
+                    with open('best_mlp_model.pkl', 'wb') as f:
+                        pickle.dump((classifier.hiddenLayer, classifier.logRegressionLayer), f)
 
             if patience <= iter:
                 done_looping = True
@@ -411,6 +411,30 @@ def test_mlp(learning_rate=0.01, L1_reg=0.00, L2_reg=0.0001, n_epochs=1000,
            os.path.split(__file__)[1] +
            ' ran for %.2fm' % ((end_time - start_time) / 60.)), file=sys.stderr)
 
+def predict():
+    """
+    An example of how to load a trained model and use it
+    to predict labels.
+    """
+
+    # load the saved model
+    classifier = MLP()
+    classifier.hiddenLayer, classifier.logRegressionLayer = pickle.load(open('best_mlp_model.pkl'))
+
+    # compile a predictor function
+    predict_model = theano.function(
+        inputs=[classifier.input],
+        outputs=classifier.y_pred)
+
+    # We can test it on some examples from test test
+    dataset='mnist.pkl.gz'
+    datasets = load_data(dataset)
+    test_set_x, test_set_y = datasets[2]
+    test_set_x = test_set_x.get_value()
+
+    predicted_values = predict_model(test_set_x[:10])
+    print("Predicted values for the first 10 examples in test set:")
+    print(predicted_values)
 
 if __name__ == '__main__':
     test_mlp()
