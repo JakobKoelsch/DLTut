@@ -242,14 +242,14 @@ def load_data(dataset):
         # floats it doesn't make sense) therefore instead of returning
         # ``shared_y`` we will have to cast it to int. This little hack
         # lets ous get around this issue
-        return shared_x, T.cast(shared_y, 'int32')
+        return shared_x, T.cast(shared_y, 'int32'), shared_y
 
-    test_set_x, test_set_y = shared_dataset(test_set)
-    valid_set_x, valid_set_y = shared_dataset(valid_set)
-    train_set_x, train_set_y = shared_dataset(train_set)
+    test_set_x, test_set_y, test_set_y_shared = shared_dataset(test_set)
+    valid_set_x, valid_set_y, dump = shared_dataset(valid_set)
+    train_set_x, train_set_y, dump = shared_dataset(train_set)
 
     rval = [(train_set_x, train_set_y), (valid_set_x, valid_set_y),
-            (test_set_x, test_set_y)]
+            (test_set_x, test_set_y, test_set_y_shared)]
     return rval
 
 
@@ -264,7 +264,7 @@ def sgd_optimization_mnist(learning_rate=0.13, n_epochs=1000,
 
     :type learning_rate: float
     :param learning_rate: learning rate used (factor for the stochastic
-                          gradient)
+                          gradient)zip(*
 
     :type n_epochs: int
     :param n_epochs: maximal number of epochs to run the optimizer
@@ -278,7 +278,7 @@ def sgd_optimization_mnist(learning_rate=0.13, n_epochs=1000,
     
     train_set_x, train_set_y = datasets[0]
     valid_set_x, valid_set_y = datasets[1]
-    test_set_x, test_set_y = datasets[2]
+    test_set_x, test_set_y, dump = datasets[2]
 
     # compute number of minibatches for training, validation and testing
     n_train_batches = train_set_x.get_value(borrow=True).shape[0] // batch_size
@@ -290,7 +290,7 @@ def sgd_optimization_mnist(learning_rate=0.13, n_epochs=1000,
     ######################
     print('... building the model')
 
-    # allocate symbolic variables for the data
+    # allocate symbolic variables for the datazip(*
     index = T.lscalar()  # index to a [mini]batch
 
     # generate symbolic variables for input (x and y represent a
@@ -367,7 +367,6 @@ def sgd_optimization_mnist(learning_rate=0.13, n_epochs=1000,
                                   # check every epoch
 
     best_validation_loss = numpy.inf
-    test_score = 0.
     start_time = timeit.default_timer()
 
     done_looping = False
@@ -375,7 +374,6 @@ def sgd_optimization_mnist(learning_rate=0.13, n_epochs=1000,
     while (epoch < n_epochs) and (not done_looping):
         epoch = epoch + 1
         for minibatch_index in range(n_train_batches):
-
             minibatch_avg_cost = train_model(minibatch_index)
             # iteration number
             iter = (epoch - 1) * n_train_batches + minibatch_index
@@ -463,13 +461,22 @@ def predict():
     # We can test it on some examples from test test
     dataset='mnist.pkl.gz'
     datasets = load_data(dataset)
-    test_set_x, test_set_y = datasets[2]
-    test_set_x = test_set_x.get_value()
+    test_set_x, dump, test_set_y = datasets[2]
 
-    predicted_values = predict_model(test_set_x[:10])
+    test_set_x = test_set_x.get_value()
+    test_set_y = test_set_y.get_value()
+
+
+    a = 0
+    b = 30
+    predicted_values = predict_model(test_set_x[a:b])
     print("Predicted values for the first 10 examples in test set:")
     print(predicted_values)
+    print(test_set_y[a:b].astype(dtype='int32'))
+    print("and the real values were:")
+
 
 
 if __name__ == '__main__':
-    sgd_optimization_mnist()
+    # sgd_optimization_mnist()
+    predict()
