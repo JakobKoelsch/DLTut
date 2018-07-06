@@ -397,7 +397,7 @@ def test_mlp(learning_rate=0.01, L1_reg=0.00, L2_reg=0.0001, n_epochs=1000,
 
                     # save the best model
                     with open('best_mlp_model.pkl', 'wb') as f:
-                        pickle.dump((classifier.hiddenLayer, classifier.logRegressionLayer), f)
+                        pickle.dump(classifier, f)
 
             if patience <= iter:
                 done_looping = True
@@ -418,8 +418,7 @@ def predict():
     """
 
     # load the saved model
-    classifier = MLP()
-    classifier.hiddenLayer, classifier.logRegressionLayer = pickle.load(open('best_mlp_model.pkl'))
+    classifier = pickle.load(open('best_mlp_model.pkl'))
 
     # compile a predictor function
     predict_model = theano.function(
