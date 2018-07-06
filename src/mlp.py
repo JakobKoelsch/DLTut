@@ -181,16 +181,6 @@ class MLP(object):
             (self.hiddenLayer.W ** 2).sum()
             + (self.logRegressionLayer.W ** 2).sum()
         )
-
-        # negative log likelihood of the MLP is given by the negative
-        # log likelihood of the output of the model, computed in the
-        # logistic regression layer
-        self.negative_log_likelihood = (
-            self.logRegressionLayer.negative_log_likelihood
-        )
-        # same holds for the function computing the number of errors
-        self.errors = self.logRegressionLayer.errors
-
         # the parameters of the model are the parameters of the two layer it is
         # made out of
         self.params = self.hiddenLayer.params + self.logRegressionLayer.params
@@ -267,7 +257,7 @@ def test_mlp(learning_rate=0.01, L1_reg=0.00, L2_reg=0.0001, n_epochs=1000,
     # the model plus the regularization terms (L1 and L2); cost is expressed
     # here symbolically
     cost = (
-        classifier.negative_log_likelihood(y)
+        classifier.logRegressionLayer.negative_log_likelihood(y)
         + L1_reg * classifier.L1
         + L2_reg * classifier.L2_sqr
     )
@@ -277,7 +267,7 @@ def test_mlp(learning_rate=0.01, L1_reg=0.00, L2_reg=0.0001, n_epochs=1000,
     # by the model on a minibatch
     test_model = theano.function(
         inputs=[index],
-        outputs=classifier.errors(y),
+        outputs=classifier.logRegressionLayer.errors(y),
         givens={
             x: test_set_x[index * batch_size:(index + 1) * batch_size],
             y: test_set_y[index * batch_size:(index + 1) * batch_size]
@@ -286,7 +276,7 @@ def test_mlp(learning_rate=0.01, L1_reg=0.00, L2_reg=0.0001, n_epochs=1000,
 
     validate_model = theano.function(
         inputs=[index],
-        outputs=classifier.errors(y),
+        outputs=classifier.logRegressionLayer.errors(y),
         givens={
             x: valid_set_x[index * batch_size:(index + 1) * batch_size],
             y: valid_set_y[index * batch_size:(index + 1) * batch_size]
@@ -422,8 +412,8 @@ def predict():
 
     # compile a predictor function
     predict_model = theano.function(
-        inputs=[classifier.input],
-        outputs=classifier.y_pred)
+        inputs=[classifier.hiddenLayer.input],
+        outputs=classifier.logRegressionLayer.y_pred)
 
     # We can test it on some examples from test test
     dataset='mnist.pkl.gz'
@@ -436,4 +426,5 @@ def predict():
     print(predicted_values)
 
 if __name__ == '__main__':
-    test_mlp()
+    # test_mlp()
+    predict()
