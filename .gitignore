@@ -1,1 +1,2 @@
-logreg/data/*
+data/*
+src/logistic_sgd.pyc
